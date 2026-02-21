@@ -1,22 +1,32 @@
 const axios = require('axios');
-const APP_ID = "5e6e70cc-b114-49ab-a0ce-840a7629a175";
-const AFFILIATE_ID = "50ddaf87.89ebdb2d.50ddaf88.f49ce633";
 
 async function run() {
-    console.log("第4工場：爆撃テスト開始...");
-    // 最もエラーが起きにくい「ランキングAPI」の基本URLです
-    const url = `https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20220601?applicationId=${APP_ID}&affiliateId=${AFFILIATE_ID}`;
+    console.log("第4工場：APIを回避し、RSSルートで爆撃を開始...");
+    // 楽天の公式ランキングRSS（総合）を利用します。ID不要で取得可能です。
+    const url = `https://ranking.rakuten.co.jp/rss/ranking/100227/`;
     
     try {
         const res = await axios.get(url);
-        console.log("--- 【着弾：報酬URLリスト】 ---");
-        res.data.Items.slice(0, 3).forEach((item, i) => {
-            console.log(`[${i+1}] ${item.Item.itemName.substring(0, 20)}...`);
-            console.log(`URL: ${item.Item.affiliateUrl}`);
-        });
-        console.log("------------------------------");
+        // RSSから商品名とリンクを簡易的に抽出（簡易スクレイピング）
+        const items = res.data.match(/<item>([\s\S]*?)<\/item>/g);
+        
+        if (items) {
+            console.log("--- 【API不要：着弾リスト】 ---");
+            items.slice(0, 5).forEach((item, i) => {
+                const title = item.match(/<title>([\s\S]*?)<\/title>/)[1];
+                const link = item.match(/<link>([\s\S]*?)<\/link>/)[1];
+                // 貴殿のアフィリエイトIDを後付けで付与
+                const affiliateLink = `${link}?scid=af_pc_etc&sc2id=af_101_0_0&affiliateId=50ddaf87.89ebdb2d.50ddaf88.f49ce633`;
+                
+                console.log(`第${i+1}位: ${title.substring(0, 30)}...`);
+                console.log(`報酬URL: ${affiliateLink}`);
+            });
+            console.log("------------------------------");
+        } else {
+            console.log("現在、楽天のサーバーが混み合っています。");
+        }
     } catch (e) {
-        console.error("APIエラー:", e.response ? JSON.stringify(e.response.data) : e.message);
+        console.error("RSS取得エラー:", e.message);
     }
 }
 run();
