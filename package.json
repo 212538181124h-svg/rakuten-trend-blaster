@@ -1,18 +1,10 @@
 {
-  "name": "rakuten-trend-blaster",
+  "name": "blogger-blaster",
   "version": "1.0.0",
-  "description": "Rakuten Trend Auto Blaster",
-  "main": "engine.js",
   "dependencies": {
     "axios": "^1.6.0"
-  }
-}
-
-{
-  "name": "blogger-trend-blaster",
-  "version": "1.0.0",
-  "dependencies": {
-    "axios": "^1.6.0",
-    "googleapis": "^126.0.0"
+  },
+  "scripts": {
+    "start": "node engine.js"
   }
 }
